@@ -70,17 +70,17 @@ var WildRydes = window.WildRydes || {};
         );
     }
 
-    function signin(email, password, onSuccess, onFailure) {
+   function signin(email, password, onSuccess, onFailure) {
+        var secretHash = computeSecretHash(
+            _config.cognito.userPoolClientId,
+            '1r1ujmk97e8m5106idacum2m9otmi8utik0l07vhn1nnqde4bn5f', // Replace with your client secret
+            toUsername(email)
+        );
+
         var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
             Username: toUsername(email),
             Password: password,
             SecretHash: secretHash
-        });
-
-        var cognitoUser = createCognitoUser(email);
-        cognitoUser.authenticateUser(authenticationDetails, {
-            onSuccess: onSuccess,
-            onFailure: onFailure
         });
     }
 
@@ -104,7 +104,13 @@ var WildRydes = window.WildRydes || {};
     function toUsername(email) {
         return email.replace('@', '-at-');
     }
-
+    /*
+     * Utility function to compute SecretHash
+     */
+    function computeSecretHash(clientId, clientSecret, username) {
+        var hmac = CryptoJS.HmacSHA256(username + clientId, clientSecret);
+        return CryptoJS.enc.Base64.stringify(hmac);
+    }
     /*
      *  Event Handlers
      */
